@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5">
+<title>TARVEN — متجرك في كل مكان | تسوق إلكتروني آمن وسريع</title>
+<meta name="description" content="TARVEN متجر إلكتروني مصري متكامل — آلاف المنتجات بأفضل الأسعار، شحن سريع وإرجاع مجاني 30 يوم">
+<meta name="keywords" content="تسوق اون لاين,متجر الكتروني,إلكترونيات,أزياء,مصر,TARVEN">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#1B4FD8">
+<link rel="canonical" href="https://tarven-eg.onrender.com/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="TARVEN — متجرك في كل مكان">
+<meta property="og:description" content="تسوق من آلاف المنتجات بأفضل الأسعار مع شحن سريع وإرجاع مجاني">
+<meta property="og:url" content="https://tarven-eg.onrender.com/">
+<meta property="og:site_name" content="TARVEN">
+<meta property="og:locale" content="ar_EG">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="TARVEN — متجرك في كل مكان">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"OnlineStore","name":"TARVEN","url":"https://tarven-eg.onrender.com","description":"متجر إلكتروني مصري متكامل","telephone":"+201112641854","email":"tarven2025@gmail.com","address":{"@type":"PostalAddress","addressCountry":"EG"},"currenciesAccepted":"EGP","paymentAccepted":"Cash,Credit Card,Vodafone Cash,InstaPay"}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<!-- BACK TO TOP -->
+<button id="back-top" aria-label="عودة للأعلى">↑</button>
+
+<!-- CART OVERLAY + SIDEBAR -->
+<div id="cart-overlay" class="cart-overlay"></div>
+<aside id="cart-sidebar" class="cart-sidebar" role="complementary" aria-label="سلة التسوق">
+  <div class="cart-header">
+    <div class="cart-header-title">🛒 سلة التسوق <span id="cart-badge" style="background:var(--primary);color:#fff;border-radius:99px;padding:2px 8px;font-size:12px"></span></div>
+    <button class="modal-close" onclick="CartUI.close()" aria-label="إغلاق السلة">✕</button>
+  </div>
+  <div id="cart-items" class="cart-items"></div>
+  <div id="cart-footer" class="cart-footer" style="display:none">
+    <div class="cart-coupon">
+      <input id="coupon-input" class="form-input" type="text" placeholder="كود الخصم..." style="height:40px;text-transform:uppercase" onkeydown="if(event.key==='Enter')CheckoutUI.applyCoupon()">
+      <button class="btn btn-ghost btn-sm" onclick="CheckoutUI.applyCoupon()">تطبيق</button>
+    </div>
+    <div id="coupon-msg" style="font-size:12px;font-weight:700;margin-bottom:10px;display:none"></div>
+    <div class="cart-totals">
+      <div class="cart-total-row"><span>المجموع</span><span id="cart-subtotal">0 ج.م</span></div>
+      <div class="cart-total-row"><span style="color:var(--success)">الخصم</span><span id="cart-discount" style="color:var(--success)">-</span></div>
+      <div class="cart-total-row"><span>الشحن</span><span id="cart-shipping">30 ج.م</span></div>
+      <div class="cart-total-row total"><span>الإجمالي</span><span id="cart-total">0 ج.م</span></div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;height:48px;font-size:15px" onclick="CartUI.close();Router.go('checkout')">متابعة للدفع →</button>
+    <button class="btn btn-ghost" style="width:100%;height:40px;margin-top:8px" onclick="CartUI.close()">← مواصلة التسوق</button>
+  </div>
+</aside>
+
+<!-- SITE HEADER (sticky across all pages) -->
+<header id="site-header" role="banner">
+  <div class="header-top">
+    🚀 شحن مجاني للطلبات فوق 200 ج.م &nbsp;|&nbsp; إرجاع مجاني 30 يوم &nbsp;|&nbsp;
+    <a href="https://wa.me/201112641854">واتساب: 01112641854</a>
+  </div>
+  <div class="header-main">
+    <div class="logo" onclick="Router.go('home')" role="link" tabindex="0" aria-label="الصفحة الرئيسية">TAR<span>VEN</span></div>
+    <div class="search-wrap" role="search">
+      <input id="main-search-input" type="search" placeholder="ابحث عن منتج، ماركة، فئة..." aria-label="بحث"
+        onkeydown="if(event.key==='Enter')doSearch()">
+      <button class="search-btn" onclick="doSearch()" aria-label="بحث">🔍</button>
+    </div>
+    <nav class="header-actions" aria-label="إجراءات الرأس">
+      <button class="hdr-btn" onclick="Router.go('search')" aria-label="بحث (موبايل)" style="display:none" id="mobile-search-btn">🔍</button>
+      <div id="user-btn-wrap">
+        <button class="hdr-btn" onclick="Router.go('login')" aria-label="حسابي">👤</button>
+      </div>
+      <button class="hdr-btn" onclick="Router.go('wishlist')" aria-label="المفضلة">🤍</button>
+      <button class="hdr-btn" onclick="CartUI.open()" aria-label="السلة" style="position:relative">
+        🛒<span id="cart-badge" class="badge"></span>
+      </button>
+    </nav>
+  </div>
+  <nav class="cats-nav" aria-label="الفئات">
+    <div id="cats-bar" class="cats-nav-inner">
+      <button class="cat-btn active" onclick="Pages.search('')">🏠 الكل</button>
+    </div>
+  </nav>
+</header>
+
+<!-- ===================== HOME PAGE ===================== -->
+<main id="page-home" class="page active" role="main">
+
+  <!-- HERO -->
+  <section class="hero" aria-label="العروض الرئيسية">
+    <div class="hero-slider" id="hero-slider">
+      <!-- Slide 1 -->
+      <div class="hero-slide hero-slide-1">
+        <div class="container">
+          <div class="hero-content">
+            <div class="hero-badge">🔥 أفضل العروض</div>
+            <h1 class="hero-title">أحدث <span>الإلكترونيات</span><br>بأسعار لا تُصدَّق</h1>
+            <p class="hero-desc">تسوق من أكبر تشكيلة إلكترونيات في مصر مع ضمان الجودة والإرجاع المجاني</p>
+            <div class="hero-btns">
+              <button class="btn btn-accent btn-lg" onclick="Pages.search('إلكترونيات')">تسوق الآن ←</button>
+              <button class="btn btn-outline" style="border-color:rgba(255,255,255,.5);color:#fff" onclick="Router.go('about')">تعرف علينا</button>
+            </div>
+            <div class="hero-stats">
+              <div><div class="hero-stat-num">+50K</div><div class="hero-stat-label">عميل راضٍ</div></div>
+              <div><div class="hero-stat-num">+5K</div><div class="hero-stat-label">منتج متاح</div></div>
+              <div><div class="hero-stat-num">4.9★</div><div class="hero-stat-label">تقييم العملاء</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Slide 2 -->
+      <div class="hero-slide hero-slide-2">
+        <div class="container">
+          <div class="hero-content">
+            <div class="hero-badge">👗 موضة 2025</div>
+            <h1 class="hero-title">أزياء عصرية<br>لكل <span>المناسبات</span></h1>
+            <p class="hero-desc">اكتشف أحدث صيحات الموضة من أكبر الماركات العالمية والمحلية</p>
+            <div class="hero-btns">
+              <button class="btn btn-accent btn-lg" onclick="Pages.search('أزياء')">اكتشف الآن ←</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Slide 3 -->
+      <div class="hero-slide hero-slide-3">
+        <div class="container">
+          <div class="hero-content">
+            <div class="hero-badge">🎮 Gaming</div>
+            <h1 class="hero-title">عالم الألعاب<br>في <span>متناول يدك</span></h1>
+            <p class="hero-desc">أحدث أجهزة الألعاب والإكسسوارات بأفضل الأسعار مع توصيل سريع</p>
+            <div class="hero-btns">
+              <button class="btn btn-accent btn-lg" onclick="Pages.search('ألعاب')">تسوق الألعاب ←</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="hero-arrow prev" onclick="prevSlide()" aria-label="السابق">‹</button>
+    <button class="hero-arrow next" onclick="nextSlide()" aria-label="التالي">›</button>
+    <div class="hero-controls">
+      <button class="hero-dot active" aria-label="الشريحة 1"></button>
+      <button class="hero-dot" aria-label="الشريحة 2"></button>
+      <button class="hero-dot" aria-label="الشريحة 3"></button>
+    </div>
+  </section>
+
+  <!-- FEATURES BAR -->
+  <section class="features-bar" aria-label="مميزاتنا">
+    <div class="container">
+      <div class="features-grid">
+        <div class="feature-item"><div class="feature-icon">🚚</div><div><div class="feature-title">شحن مجاني</div><div class="feature-sub">فوق 200 ج.م</div></div></div>
+        <div class="feature-item"><div class="feature-icon">↩️</div><div><div class="feature-title">إرجاع مجاني</div><div class="feature-sub">خلال 30 يوم</div></div></div>
+        <div class="feature-item"><div class="feature-icon">🔒</div><div><div class="feature-title">دفع آمن 100%</div><div class="feature-sub">SSL مشفر</div></div></div>
+        <div class="feature-item"><div class="feature-icon">🎧</div><div><div class="feature-title">دعم 24/7</div><div class="feature-sub">واتساب وإيميل</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED PRODUCTS -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <div class="section-eyebrow">مختارة بعناية</div>
+          <h2 class="section-title">⭐ منتجات مميزة</h2>
+        </div>
+        <button class="btn btn-ghost" onclick="Pages.search('')">عرض الكل →</button>
+      </div>
+      <div id="featured-grid" class="products-grid"></div>
+    </div>
+  </section>
+
+  <!-- PROMO BANNERS -->
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="promo-grid">
+        <div class="promo-card promo-card-1">
+          <div class="deco">📱</div>
+          <div class="promo-label">عرض محدود</div>
+          <div class="promo-title">خصم حتى 40%<br>على الإلكترونيات</div>
+          <button class="btn btn-accent btn-sm" style="margin-top:12px" onclick="Pages.search('إلكترونيات')">تسوق الآن →</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div class="promo-card promo-card-2" style="min-height:auto;flex:1">
+            <div class="promo-label">جديد</div>
+            <div class="promo-title" style="font-size:17px">أزياء الموسم</div>
+          </div>
+          <div class="promo-card promo-card-3" style="min-height:auto;flex:1">
+            <div class="promo-label">توفير</div>
+            <div class="promo-title" style="font-size:17px">عروض المنزل</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COUNTDOWN OFFERS -->
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="countdown-wrap">
+        <div class="countdown-header">
+          <div>
+            <div class="section-eyebrow" style="color:rgba(255,255,255,.7)">ينتهي قريباً</div>
+            <div class="countdown-title">⚡ عروض اليوم الحصرية</div>
+          </div>
+          <div id="countdown" class="countdown-timer"></div>
+        </div>
+        <div id="bestsellers-grid" class="products-grid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NEWSLETTER -->
+  <section style="background:linear-gradient(135deg,#1B4FD8,#0D2880);padding:52px 0">
+    <div class="container" style="text-align:center">
+      <div style="font-size:40px;margin-bottom:12px">🎁</div>
+      <h2 style="font-size:24px;font-weight:900;color:#fff;margin-bottom:8px">اشترك واحصل على خصم 15%</h2>
+      <p style="color:rgba(255,255,255,.75);font-size:15px;margin-bottom:28px">على أول طلب + أحدث العروض الحصرية</p>
+      <div style="display:flex;gap:10px;max-width:440px;margin:0 auto">
+        <input id="newsletter-email" type="email" placeholder="بريدك الإلكتروني"
+          style="flex:1;height:50px;border:none;border-radius:var(--radius-xl);padding:0 20px;font-family:var(--font);font-size:14px;outline:none"
+          onkeydown="if(event.key==='Enter')subscribeNewsletter()">
+        <button onclick="subscribeNewsletter()" class="btn btn-accent" style="height:50px;border-radius:var(--radius-xl);white-space:nowrap">اشترك الآن</button>
+      </div>
+      <p style="color:rgba(255,255,255,.35);font-size:11px;margin-top:12px">يمكنك إلغاء الاشتراك في أي وقت</p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer role="contentinfo">
+    <div class="footer-main">
+      <div class="container">
+        <div class="footer-grid">
+          <div>
+            <div class="footer-logo">TAR<span>VEN</span></div>
+            <p class="footer-desc">منصة تجارة إلكترونية مصرية متكاملة — آلاف المنتجات من أفضل الماركات بأفضل الأسعار مع ضمان الجودة والإرجاع.</p>
+            <div class="footer-socials">
+              <button class="social-icon" onclick="UI.toast('قريباً على X','')">𝕏</button>
+              <button class="social-icon" onclick="UI.toast('قريباً على Facebook','')">📘</button>
+              <button class="social-icon" onclick="UI.toast('قريباً على Instagram','')">📸</button>
+              <button class="social-icon" onclick="window.open('https://wa.me/201112641854')">💬</button>
+            </div>
+            <div class="footer-newsletter" style="margin-top:16px">
+              <input id="footer-newsletter" type="email" placeholder="اشترك في نشرتنا البريدية">
+              <button onclick="subscribeNewsletter('footer-newsletter')">اشترك</button>
+            </div>
+          </div>
+          <div>
+            <h4>روابط سريعة</h4>
+            <ul class="footer-links">
+              <li><a onclick="Router.go('about')" style="cursor:pointer">من نحن</a></li>
+              <li><a onclick="Router.go('contact')" style="cursor:pointer">تواصل معنا</a></li>
+              <li><a onclick="Pages.trackOrder()" style="cursor:pointer">📦 تتبع طلبك</a></li>
+              <li><a onclick="Pages.search('')" style="cursor:pointer">جميع المنتجات</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4>سياساتنا</h4>
+            <ul class="footer-links">
+              <li><a onclick="Router.go('returns')" style="cursor:pointer">سياسة الإرجاع</a></li>
+              <li><a onclick="Router.go('shipping')" style="cursor:pointer">سياسة الشحن</a></li>
+              <li><a onclick="Router.go('privacy')" style="cursor:pointer">الخصوصية</a></li>
+              <li><a onclick="Router.go('terms')" style="cursor:pointer">الشروط والأحكام</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4>تواصل معنا</h4>
+            <ul class="footer-links">
+              <li><a href="https://wa.me/201112641854">💬 واتساب: 01112641854</a></li>
+              <li><a href="mailto:tarven2025@gmail.com">📧 tarven2025@gmail.com</a></li>
+              <li><span style="font-size:13px;color:rgba(255,255,255,.4)">🕐 9 ص – 11 م يومياً</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="footer-bottom">
+        <div class="footer-bottom-left">© 2025 TARVEN — جميع الحقوق محفوظة</div>
+        <div class="footer-payments">
+          <span class="pay-icon">VISA</span>
+          <span class="pay-icon">Mastercard</span>
+          <span class="pay-icon">Vodafone</span>
+          <span class="pay-icon">InstaPay</span>
+          <span class="pay-icon">كاش</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+</main>
+
+<!-- ===================== PRODUCT PAGE ===================== -->
+<div id="page-product" class="page">
+  <header id="product-header">
+    <div class="header-main" style="max-width:1320px;margin:0 auto;padding:0 24px">
+      <div class="logo" onclick="Router.go('home')" style="cursor:pointer">TAR<span>VEN</span></div>
+      <div style="flex:1"></div>
+      <nav class="header-actions">
+        <button class="hdr-btn" onclick="Router.go('home')">🏠</button>
+        <button class="hdr-btn" onclick="CartUI.open()" style="position:relative">🛒<span class="badge" id="cart-badge-2"></span></button>
+      </nav>
+    </div>
+  </header>
+  <main id="product-container" style="flex:1"></main>
+</div>
+
+<!-- ===================== SEARCH PAGE ===================== -->
+<div id="page-search" class="page" style="flex-direction:column">
+  <div style="background:var(--white);border-bottom:1px solid var(--border);padding:14px 0;position:sticky;top:0;z-index:100">
+    <div class="container" style="display:flex;gap:10px;align-items:center">
+      <button class="btn btn-ghost btn-sm" onclick="Router.go('home')" style="flex-shrink:0">← رجوع</button>
+      <div class="search-wrap" style="flex:1;max-width:600px">
+        <input id="mobile-search-input" type="search" placeholder="ابحث في المتجر..." onkeydown="if(event.key==='Enter')doSearch()">
+        <button class="search-btn" onclick="doSearch()">🔍</button>
+      </div>
+    </div>
+  </div>
+  <div class="container" style="padding-top:28px;padding-bottom:40px;flex:1">
+    <div class="search-layout">
+      <!-- Filters -->
+      <aside class="search-filters">
+        <div class="filter-group">
+          <div class="filter-title">الفئات</div>
+          <div id="filter-cats" class="filter-options">
+            <div class="skeleton" style="height:120px"></div>
+          </div>
+        </div>
+        <div class="filter-group">
+          <div class="filter-title">السعر</div>
+          <div class="price-range">
+            <input id="filter-min" class="form-input" type="number" placeholder="من" onchange="Pages.search(Store.searchQuery)">
+            <span style="color:var(--text-4)">—</span>
+            <input id="filter-max" class="form-input" type="number" placeholder="إلى" onchange="Pages.search(Store.searchQuery)">
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width:100%" onclick="Pages.search(Store.searchQuery)">تطبيق الفلاتر</button>
+        <button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="document.querySelectorAll('.filter-cat').forEach(c=>c.checked=false);document.getElementById('filter-min').value='';document.getElementById('filter-max').value='';Pages.search('')">مسح الفلاتر</button>
+      </aside>
+      <!-- Results -->
+      <div>
+        <div class="search-results-header">
+          <div>
+            <h1 id="search-results-title" style="font-size:20px;font-weight:900">المنتجات</h1>
+            <div id="results-count" style="font-size:13px;color:var(--text-3);margin-top:3px"></div>
+          </div>
+          <select id="sort-select" class="sort-select" onchange="Pages.search(Store.searchQuery)">
+            <option value="">الأحدث</option>
+            <option value="price_asc">السعر: من الأقل</option>
+            <option value="price_desc">السعر: من الأعلى</option>
+            <option value="rating">الأعلى تقييماً</option>
+            <option value="bestseller">الأكثر مبيعاً</option>
+          </select>
+        </div>
+        <div id="search-results-grid" class="products-grid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== CHECKOUT PAGE ===================== -->
+<div id="page-checkout" class="page" style="flex-direction:column">
+  <div style="background:var(--white);border-bottom:1px solid var(--border);padding:16px 0">
+    <div class="container" style="display:flex;align-items:center;gap:16px">
+      <button class="btn btn-ghost btn-sm" onclick="CartUI.open()">← السلة</button>
+      <div style="font-size:18px;font-weight:900;flex:1;text-align:center">إتمام الطلب</div>
+      <div class="logo" style="font-size:22px">TAR<span>VEN</span></div>
+    </div>
+  </div>
+  <div class="container" style="flex:1">
+    <div class="checkout-layout">
+      <!-- Left: Forms -->
+      <div>
+        <!-- Shipping Info -->
+        <div class="checkout-card">
+          <div class="checkout-card-header"><span class="step-num">1</span> بيانات التوصيل</div>
+          <div class="checkout-card-body">
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">الاسم الكامل *</label><input id="ch-name" class="form-input" placeholder="مثال: محمد أحمد"></div>
+              <div class="form-group"><label class="form-label">رقم الهاتف *</label><input id="ch-phone" class="form-input" type="tel" placeholder="01XXXXXXXXX"></div>
+            </div>
+            <div class="form-group"><label class="form-label">البريد الإلكتروني</label><input id="ch-email" class="form-input" type="email" placeholder="example@gmail.com"></div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">المحافظة *</label>
+                <select id="ch-city" class="form-input form-select">
+                  <option value="">اختر المحافظة</option>
+                  <option>القاهرة</option><option>الجيزة</option><option>الإسكندرية</option>
+                  <option>الدقهلية</option><option>البحيرة</option><option>الفيوم</option>
+                  <option>الغربية</option><option>الإسماعيلية</option><option>المنوفية</option>
+                  <option>المنيا</option><option>القليوبية</option><option>السويس</option>
+                  <option>أسوان</option><option>أسيوط</option><option>بني سويف</option>
+                  <option>بورسعيد</option><option>دمياط</option><option>كفر الشيخ</option>
+                  <option>الأقصر</option><option>قنا</option><option>الشرقية</option><option>سوهاج</option>
+                </select>
+              </div>
+              <div class="form-group"><label class="form-label">الرمز البريدي</label><input class="form-input" placeholder="مثال: 11511"></div>
+            </div>
+            <div class="form-group"><label class="form-label">العنوان التفصيلي *</label><input id="ch-address" class="form-input" placeholder="الحي، الشارع، رقم المبنى، الدور، الشقة..."></div>
+            <div class="form-group"><label class="form-label">ملاحظات</label><input id="ch-notes" class="form-input" placeholder="مثال: اتصل قبل التوصيل بساعة"></div>
+          </div>
+        </div>
+        <!-- Shipping Method -->
+        <div class="checkout-card">
+          <div class="checkout-card-header"><span class="step-num">2</span> طريقة الشحن</div>
+          <div class="checkout-card-body">
+            <div class="shipping-methods">
+              <div class="ship-method active" onclick="this.parentElement.querySelectorAll('.ship-method').forEach(m=>m.classList.remove('active'));this.classList.add('active')">
+                <input type="radio" name="shipping" checked style="margin-left:auto"> 
+                <div class="ship-method-info"><div class="ship-method-name">شحن عادي (أرامكس)</div><div class="ship-method-sub">يصل خلال 2-4 أيام عمل</div></div>
+                <div class="ship-method-price" style="color:var(--success)">مجاني*</div>
+              </div>
+              <div class="ship-method" onclick="this.parentElement.querySelectorAll('.ship-method').forEach(m=>m.classList.remove('active'));this.classList.add('active')">
+                <input type="radio" name="shipping" style="margin-left:auto">
+                <div class="ship-method-info"><div class="ship-method-name">شحن سريع (DHL)</div><div class="ship-method-sub">يصل خلال 1-2 يوم</div></div>
+                <div class="ship-method-price">30 ج.م</div>
+              </div>
+            </div>
+            <p style="font-size:12px;color:var(--text-4);margin-top:10px">* مجاني على الطلبات فوق 200 ج.م</p>
+          </div>
+        </div>
+        <!-- Payment Method -->
+        <div class="checkout-card">
+          <div class="checkout-card-header"><span class="step-num">3</span> طريقة الدفع</div>
+          <div class="checkout-card-body">
+            <div class="payment-methods">
+              <div class="pay-method active" onclick="CheckoutUI.selectedPayment='cash';this.parentElement.querySelectorAll('.pay-method').forEach(m=>m.classList.remove('active'));this.classList.add('active')">
+                <div class="pay-method-icon">💵</div>
+                <div><div class="pay-method-label">كاش عند الاستلام</div><div class="pay-method-sub">ادفع عند وصول طلبك</div></div>
+                <input type="radio" name="pay" checked class="pay-method-radio">
+              </div>
+              <div class="pay-method" onclick="CheckoutUI.selectedPayment='vodafone';this.parentElement.querySelectorAll('.pay-method').forEach(m=>m.classList.remove('active'));this.classList.add('active')">
+                <div class="pay-method-icon">📱</div>
+                <div><div class="pay-method-label">فودافون كاش</div><div class="pay-method-sub">01112641854</div></div>
+                <input type="radio" name="pay" class="pay-method-radio">
+              </div>
+              <div class="pay-method" onclick="CheckoutUI.selectedPayment='instapay';this.parentElement.querySelectorAll('.pay-method').forEach(m=>m.classList.remove('active'));this.classList.add('active')">
+                <div class="pay-method-icon">⚡</div>
+                <div><div class="pay-method-label">إنستاباي</div><div class="pay-method-sub">دفع إلكتروني فوري</div></div>
+                <input type="radio" name="pay" class="pay-method-radio">
+              </div>
+              <div class="pay-method" onclick="CheckoutUI.selectedPayment='card';this.parentElement.querySelectorAll('.pay-method').forEach(m=>m.classList.remove('active'));this.classList.add('active')">
+                <div class="pay-method-icon">💳</div>
+                <div><div class="pay-method-label">بطاقة بنكية</div><div class="pay-method-sub">Visa / Mastercard (قريباً)</div></div>
+                <input type="radio" name="pay" class="pay-method-radio">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Right: Order Summary -->
+      <div class="checkout-sticky">
+        <div class="order-summary">
+          <div class="order-summary-header">ملخص الطلب</div>
+          <div id="order-summary-items" class="order-summary-items"></div>
+          <div style="padding:12px 20px;border-top:1px solid var(--border)">
+            <div style="display:flex;gap:8px">
+              <input id="coupon-input-ch" class="form-input" style="flex:1;height:38px" placeholder="كود الخصم..." onkeydown="if(event.key==='Enter')CheckoutUI.applyCoupon()">
+              <button class="btn btn-ghost btn-sm" onclick="CheckoutUI.applyCoupon()">تطبيق</button>
+            </div>
+            <div id="coupon-msg" style="font-size:12px;font-weight:700;margin-top:8px"></div>
+          </div>
+          <div class="order-summary-totals">
+            <div class="summary-row"><span>المجموع الفرعي</span><span id="ch-subtotal">—</span></div>
+            <div class="summary-row discount"><span>الخصم</span><span id="ch-discount">-</span></div>
+            <div class="summary-row"><span>الشحن</span><span id="ch-shipping">—</span></div>
+            <div class="summary-row total"><span>الإجمالي</span><span id="ch-total">—</span></div>
+          </div>
+          <div style="padding:16px 20px">
+            <button id="submit-order-btn" class="btn btn-primary btn-lg" style="width:100%" onclick="CheckoutUI.submit()">
+              🔒 تأكيد الطلب والدفع
+            </button>
+            <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;font-size:12px;color:var(--text-4)">
+              <span>🔒</span><span>دفع آمن بتشفير SSL</span><span>|</span><span>إرجاع مجاني 30 يوم</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== CONFIRM PAGE ===================== -->
+<div id="page-confirm" class="page" style="justify-content:center;align-items:center;flex-direction:column;min-height:100vh">
+  <div class="confirm-wrap">
+    <div class="confirm-icon-wrap">✅</div>
+    <h1 class="confirm-title">تم تأكيد طلبك بنجاح!</h1>
+    <p class="confirm-sub">شكراً لتسوقك من TARVEN — سنتواصل معك قريباً لتأكيد الطلب</p>
+    <div class="confirm-order-num" id="confirm-num">TRV-000000</div>
+    <div class="confirm-details">
+      <div class="confirm-row"><span class="confirm-row-label">الاسم</span><span id="confirm-name" class="confirm-row-val">—</span></div>
+      <div class="confirm-row"><span class="confirm-row-label">التاريخ</span><span id="confirm-date" class="confirm-row-val">—</span></div>
+      <div class="confirm-row"><span class="confirm-row-label">رقم الهاتف</span><span id="confirm-phone" class="confirm-row-val">—</span></div>
+      <div class="confirm-row"><span class="confirm-row-label">الإجمالي</span><span id="confirm-total" class="confirm-row-val" style="color:var(--primary)">—</span></div>
+    </div>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-primary btn-lg" onclick="Pages.trackOrder(document.getElementById('prefill-track').value)">📦 تتبع طلبك</button>
+      <button class="btn btn-ghost btn-lg" onclick="Router.go('home')">🛍️ مواصلة التسوق</button>
+    </div>
+    <p style="margin-top:20px;font-size:13px;color:var(--text-3)">
+      📞 للاستفسار: واتساب <a href="https://wa.me/201112641854" style="color:var(--primary);font-weight:700">01112641854</a>
+    </p>
+    <input type="hidden" id="prefill-track">
+  </div>
+</div>
+
+<!-- ===================== TRACK PAGE ===================== -->
+<div id="page-track" class="page" style="flex-direction:column">
+  <div style="background:var(--bg);border-bottom:1px solid var(--border);padding:14px 0">
+    <div class="container"><button class="btn btn-ghost btn-sm" onclick="Router.go('home')">← الرئيسية</button></div>
+  </div>
+  <div class="container" style="flex:1">
+    <div class="track-wrap">
+      <h1 style="font-size:28px;font-weight:900;margin-bottom:8px">📦 تتبع طلبك</h1>
+      <p style="color:var(--text-3);font-size:15px;margin-bottom:28px">أدخل رقم الطلب لمعرفة حالته</p>
+      <div style="display:flex;gap:10px;margin-bottom:8px">
+        <input id="track-input" class="form-input" style="flex:1" placeholder="مثال: TRV-123456" onkeydown="if(event.key==='Enter')Pages.trackOrder()">
+        <button class="btn btn-primary" onclick="Pages.trackOrder()">🔍 تتبع</button>
+      </div>
+      <div id="track-result" style="display:none;margin-top:20px"></div>
+      <div style="background:var(--bg-2);border-radius:var(--radius);padding:20px;margin-top:28px;text-align:center">
+        <p style="font-size:14px;font-weight:700;margin-bottom:6px">محتاج مساعدة؟</p>
+        <p style="font-size:13px;color:var(--text-3)">
+          واتساب <a href="https://wa.me/201112641854" style="color:var(--primary);font-weight:700">01112641854</a>
+          &nbsp;|&nbsp;
+          <a href="mailto:tarven2025@gmail.com" style="color:var(--primary)">tarven2025@gmail.com</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== LOGIN PAGE ===================== -->
+<div id="page-login" class="page" style="justify-content:center;align-items:center;flex-direction:column;min-height:100vh;background:linear-gradient(135deg,#EEF2FF,#E0E7FF)">
+  <div class="auth-card">
+    <div class="auth-logo">TAR<span>VEN</span></div>
+    <h1 class="auth-title">مرحباً بك!</h1>
+    <p class="auth-sub">سجل دخولك للوصول لحسابك</p>
+    <div class="social-btns">
+      <button class="social-btn" onclick="UI.toast('قريباً 🍎','')">🍎 Apple</button>
+      <button class="social-btn" onclick="UI.toast('قريباً 🌐','')">🌐 Google</button>
+    </div>
+    <div class="auth-divider">أو بالبريد الإلكتروني</div>
+    <div id="login-err" style="display:none;background:#FEE2E2;color:var(--danger);padding:10px 14px;border-radius:var(--radius-sm);font-size:13px;margin-bottom:12px;align-items:center;gap:6px"></div>
+    <div class="auth-form">
+      <div class="form-group">
+        <label class="form-label">البريد الإلكتروني</label>
+        <input id="login-email" class="form-input" type="email" placeholder="example@gmail.com" onkeydown="if(event.key==='Enter')AuthPages.login()">
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="display:flex;justify-content:space-between">
+          كلمة المرور
+          <a onclick="UI.toast('سيتم إرسال رابط الاستعادة 📧')" style="cursor:pointer;color:var(--primary);font-size:12px;font-weight:700">نسيت كلمتك؟</a>
+        </label>
+        <div class="input-group">
+          <input id="login-pass" class="form-input" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')AuthPages.login()">
+        </div>
+      </div>
+      <button id="login-btn" class="btn btn-primary btn-lg" style="width:100%" onclick="AuthPages.login()">تسجيل الدخول</button>
+    </div>
+    <div class="auth-footer">ليس لديك حساب؟ <a onclick="Router.go('signup')" style="cursor:pointer">أنشئ حساباً مجاناً →</a></div>
+    <div class="demo-hint">
+      💡 للتجربة: <strong>demo@tarven.com</strong> / <strong>demo123</strong>
+    </div>
+    <button class="btn btn-ghost" style="width:100%;margin-top:12px" onclick="Router.go('home')">← العودة للمتجر</button>
+  </div>
+</div>
+
+<!-- ===================== SIGNUP PAGE ===================== -->
+<div id="page-signup" class="page" style="justify-content:center;align-items:center;flex-direction:column;min-height:100vh;background:linear-gradient(135deg,#EEF2FF,#E0E7FF);padding:20px">
+  <div class="auth-card">
+    <div class="auth-logo">TAR<span>VEN</span></div>
+    <h1 class="auth-title">إنشاء حساب جديد</h1>
+    <p class="auth-sub">انضم لآلاف المتسوقين السعداء</p>
+    <div id="signup-err" style="display:none;background:#FEE2E2;color:var(--danger);padding:10px 14px;border-radius:var(--radius-sm);font-size:13px;margin-bottom:12px"></div>
+    <div class="auth-form">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">الاسم الأول *</label><input id="signup-fname" class="form-input" placeholder="محمد"></div>
+        <div class="form-group"><label class="form-label">اسم العائلة</label><input id="signup-lname" class="form-input" placeholder="أحمد"></div>
+      </div>
+      <div class="form-group"><label class="form-label">البريد الإلكتروني *</label><input id="signup-email" class="form-input" type="email" placeholder="example@gmail.com"></div>
+      <div class="form-group"><label class="form-label">رقم الهاتف</label><input id="signup-phone" class="form-input" type="tel" placeholder="01XXXXXXXXX"></div>
+      <div class="form-group"><label class="form-label">كلمة المرور * (6 أحرف+)</label><input id="signup-pass" class="form-input" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')AuthPages.signupAction()"></div>
+      <button id="signup-btn" class="btn btn-primary btn-lg" style="width:100%" onclick="AuthPages.signupAction()">إنشاء الحساب →</button>
+    </div>
+    <div class="auth-footer">لديك حساب؟ <a onclick="Router.go('login')" style="cursor:pointer">سجل دخولك</a></div>
+    <button class="btn btn-ghost" style="width:100%;margin-top:12px" onclick="Router.go('home')">← العودة للمتجر</button>
+  </div>
+</div>
+
+<!-- ===================== PROFILE PAGE ===================== -->
+<div id="page-profile" class="page" style="flex-direction:column">
+  <div style="background:var(--bg);border-bottom:1px solid var(--border);padding:14px 0">
+    <div class="container" style="display:flex;justify-content:space-between;align-items:center">
+      <button class="btn btn-ghost btn-sm" onclick="Router.go('home')">← الرئيسية</button>
+      <h1 style="font-size:18px;font-weight:900">حسابي</h1>
+      <button class="btn btn-danger btn-sm" onclick="AuthPages.logout()">تسجيل الخروج</button>
+    </div>
+  </div>
+  <div class="container" style="max-width:800px;flex:1;padding-top:32px;padding-bottom:40px">
+    <!-- Profile Info -->
+    <div class="checkout-card" style="margin-bottom:24px">
+      <div class="checkout-card-header">👤 بياناتي الشخصية</div>
+      <div class="checkout-card-body">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">الاسم الكامل</label><input id="profile-name" class="form-input"></div>
+          <div class="form-group"><label class="form-label">رقم الهاتف</label><input id="profile-phone" class="form-input" type="tel"></div>
+        </div>
+        <div class="form-group"><label class="form-label">البريد الإلكتروني</label><input id="profile-email" class="form-input" type="email" disabled style="opacity:.6"></div>
+        <button class="btn btn-primary" style="margin-top:8px" onclick="Pages.saveProfile()">💾 حفظ التغييرات</button>
+      </div>
+    </div>
+    <!-- Orders -->
+    <div class="checkout-card">
+      <div class="checkout-card-header">📦 طلباتي</div>
+      <div class="checkout-card-body">
+        <div id="my-orders-list" style="display:flex;flex-direction:column;gap:10px">
+          <div class="skeleton" style="height:70px"></div>
+          <div class="skeleton" style="height:70px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== WISHLIST PAGE ===================== -->
+<div id="page-wishlist" class="page" style="flex-direction:column">
+  <div style="background:var(--bg);border-bottom:1px solid var(--border);padding:14px 0">
+    <div class="container"><button class="btn btn-ghost btn-sm" onclick="Router.go('home')">← الرئيسية</button></div>
+  </div>
+  <div class="container" style="flex:1;padding-top:28px;padding-bottom:40px">
+    <h1 style="font-size:24px;font-weight:900;margin-bottom:24px">🤍 قائمة المفضلة</h1>
+    <div id="wishlist-grid" class="wishlist-grid"></div>
+  </div>
+</div>
+
+<!-- ===================== ABOUT PAGE ===================== -->
+<div id="page-about" class="page" style="flex-direction:column">
+  <div class="about-hero">
+    <div class="container">
+      <h1>عن TARVEN</h1>
+      <p>منصة تجارة إلكترونية مصرية تأسست برؤية واضحة — توفير تجربة تسوق استثنائية لكل مصري</p>
+    </div>
+  </div>
+  <div class="container">
+    <div class="about-stats">
+      <div class="about-stat"><div class="about-stat-num">50K+</div><div class="about-stat-label">عميل راضٍ</div></div>
+      <div class="about-stat"><div class="about-stat-num">5K+</div><div class="about-stat-label">منتج متاح</div></div>
+      <div class="about-stat"><div class="about-stat-num">4.9★</div><div class="about-stat-label">تقييم متوسط</div></div>
+      <div class="about-stat"><div class="about-stat-num">27</div><div class="about-stat-label">محافظة نوصلها</div></div>
+    </div>
+    <div class="policy-wrap" style="padding-top:0">
+      <h2>قصتنا</h2>
+      <p>بدأ TARVEN برؤية بسيطة: توفير منصة تسوق إلكتروني سهلة وموثوقة لكل المصريين. انطلقنا في 2025 بمجموعة صغيرة من المنتجات، واليوم نفخر بتقديم آلاف المنتجات من أفضل الماركات العالمية والمحلية.</p>
+      <h2>رسالتنا</h2>
+      <p>نؤمن أن كل شخص يستحق تجربة تسوق مريحة وآمنة بأسعار عادلة. نسعى دائماً لتقديم أفضل قيمة لعملائنا مع ضمان جودة المنتجات وسرعة التوصيل.</p>
+      <h2>لماذا TARVEN؟</h2>
+      <ul>
+        <li>✅ آلاف المنتجات الأصلية والمضمونة</li>
+        <li>🚚 شحن سريع لجميع محافظات مصر</li>
+        <li>↩️ إرجاع مجاني خلال 30 يوم</li>
+        <li>🔒 دفع آمن بتشفير SSL</li>
+        <li>🎧 دعم عملاء 7 أيام في الأسبوع</li>
+      </ul>
+    </div>
+  </div>
+  <button class="btn btn-ghost btn-sm" style="max-width:200px;margin:0 auto 32px" onclick="Router.go('home')">← العودة للمتجر</button>
+</div>
+
+<!-- ===================== CONTACT PAGE ===================== -->
+<div id="page-contact" class="page" style="flex-direction:column">
+  <div style="background:var(--bg);border-bottom:1px solid var(--border);padding:14px 0">
+    <div class="container"><button class="btn btn-ghost btn-sm" onclick="Router.go('home')">← الرئيسية</button></div>
+  </div>
+  <div class="container" style="flex:1">
+    <div class="contact-layout">
+      <div>
+        <h1 style="font-size:28px;font-weight:900;margin-bottom:8px">تواصل معنا 💬</h1>
+        <p style="color:var(--text-3);margin-bottom:28px">نحن هنا للمساعدة، تواصل معنا وسنرد خلال 24 ساعة</p>
+        <div class="contact-card">
+          <div class="form-group" style="margin-bottom:16px">
+            <label class="form-label">اسمك الكريم</label>
+            <input id="contact-name" class="form-input" placeholder="محمد أحمد">
+          </div>
+          <div class="form-group" style="margin-bottom:16px">
+            <label class="form-label">بريدك الإلكتروني</label>
+            <input id="contact-email" class="form-input" type="email" placeholder="example@gmail.com">
+          </div>
+          <div class="form-group" style="margin-bottom:20px">
+            <label class="form-label">رسالتك</label>
+            <textarea id="contact-msg" class="form-input form-textarea" placeholder="اكتب رسالتك هنا..."></textarea>
+          </div>
+          <button class="btn btn-primary btn-lg" onclick="submitContact()">📤 إرسال الرسالة</button>
+        </div>
+      </div>
+      <div>
+        <div class="contact-methods">
+          <div class="contact-method">
+            <div class="contact-method-icon">💬</div>
+            <div><div class="contact-method-label">واتساب</div><div class="contact-method-val"><a href="https://wa.me/201112641854">01112641854</a></div></div>
+          </div>
+          <div class="contact-method">
+            <div class="contact-method-icon">📧</div>
+            <div><div class="contact-method-label">البريد الإلكتروني</div><div class="contact-method-val"><a href="mailto:tarven2025@gmail.com">tarven2025@gmail.com</a></div></div>
+          </div>
+          <div class="contact-method">
+            <div class="contact-method-icon">🕐</div>
+            <div><div class="contact-method-label">أوقات العمل</div><div class="contact-method-val">9 ص – 11 م (كل يوم)</div></div>
+          </div>
+          <div class="contact-method">
+            <div class="contact-method-icon">📍</div>
+            <div><div class="contact-method-label">الموقع</div><div class="contact-method-val">القاهرة، مصر</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== POLICY PAGES ===================== -->
+<div id="page-returns" class="page" style="flex-direction:column">
+  <div style="background:var(--bg);border-bottom:1px solid var(--border);padding:14px 0"><div class="container"><button class="btn btn-ghost btn-sm" onclick="Router.go('home')">← الرئيسية</button></div></div>
+  <div class="policy-wrap">
+    <h1>سياسة الإرجاع والاستبدال ↩️</h1>
+    <p style="color:var(--text-3)">آخر تحديث: يناير 2025</p>
+    <h2>مدة الإرجاع</h2>
+    <p>نقبل طلبات الإرجاع خلال <strong>30 يوماً</strong> من تاريخ الاستلام، شريطة أن يكون المنتج بحالته الأصلية وفي عبوته الأصلية.</p>
+    <h2>شروط الإرجاع</h2>
+    <ul>
+      <li>المنتج بحالته الأصلية غير مستعمل</li>
+      <li>العبوة الأصلية كاملة مع جميع الملحقات</li>
+      <li>وجود فاتورة الشراء أو رقم الطلب</li>
+    </ul>
+    <h2>خطوات الإرجاع</h2>
+    <p>تواصل معنا على واتساب 01112641854 أو إيميل tarven2025@gmail.com وسنرسل لك مندوب الاستلام مجاناً.</p>
+    <h2>الاستثناءات</h2>
+    <ul>
+      <li>المنتجات التي تم فتحها وتشغيلها</li>
+      <li>المستلزمات الشخصية (مستحضرات التجميل، الملابس الداخلية)</li>
+      <li>المنتجات المخصصة حسب الطلب</li>
+    </ul>
+  </div>
+</div>
+
+<div id="page-shipping" class="page" style="flex-direction:column">
+  <div style="background:var(--bg);border-bottom:1px solid var(--border);padding:14px 0"><div class="container"><button class="btn btn-ghost btn-sm" onclick="Router.go('home')">← الرئيسية</button></div></div>
+  <div class="policy-wrap">
+    <h1>سياسة الشحن والتوصيل 🚚</h1>
+    <h2>مناطق التوصيل</h2>
+    <p>نوصل لجميع محافظات جمهورية مصر العربية الـ 27.</p>
+    <h2>مدد التوصيل</h2>
+    <table class="policy-table">
+      <tr><th>المنطقة</th><th>المدة</th><th>التكلفة</th></tr>
+      <tr><td>القاهرة والجيزة</td><td>1-2 يوم عمل</td><td>مجاني فوق 200 ج.م</td></tr>
+      <tr><td>المحافظات الكبرى</td><td>2-3 أيام</td><td>مجاني فوق 200 ج.م</td></tr>
+      <tr><td>باقي المحافظات</td><td>3-5 أيام</td><td>30 ج.م</td></tr>
+    </table>
+    <h2>تتبع الشحنة</h2>
+    <p>بعد شحن طلبك ستصلك رسالة SMS برقم التتبع. يمكنك أيضاً تتبع طلبك من صفحة "تتبع الطلب" في الموقع.</p>
+  </div>
+</div>
+
+<div id="page-privacy" class="page" style="flex-direction:column">
+  <div style="background:var(--bg);border-bottom:1px solid var(--border);padding:14px 0"><div class="container"><button class="btn btn-ghost btn-sm" onclick="Router.go('home')">← الرئيسية</button></div></div>
+  <div class="policy-wrap">
+    <h1>سياسة الخصوصية 🔒</h1>
+    <h2>البيانات التي نجمعها</h2>
+    <p>نجمع فقط البيانات الضرورية لتقديم خدماتنا: الاسم، البريد الإلكتروني، رقم الهاتف، عنوان التوصيل.</p>
+    <h2>كيف نستخدم بياناتك</h2>
+    <ul>
+      <li>معالجة طلباتك وتوصيلها</li>
+      <li>التواصل معك بشأن طلباتك</li>
+      <li>تحسين خدماتنا وتجربة المستخدم</li>
+    </ul>
+    <h2>حماية بياناتك</h2>
+    <p>نستخدم تشفير SSL لحماية جميع البيانات المتبادلة. لا نشارك بياناتك مع أي طرف ثالث إلا لأغراض التوصيل.</p>
+    <h2>تواصل معنا</h2>
+    <p>لأي استفسار عن خصوصيتك: tarven2025@gmail.com</p>
+  </div>
+</div>
+
+<div id="page-terms" class="page" style="flex-direction:column">
+  <div style="background:var(--bg);border-bottom:1px solid var(--border);padding:14px 0"><div class="container"><button class="btn btn-ghost btn-sm" onclick="Router.go('home')">← الرئيسية</button></div></div>
+  <div class="policy-wrap">
+    <h1>الشروط والأحكام 📋</h1>
+    <h2>القبول</h2>
+    <p>باستخدامك لموقع TARVEN، فإنك توافق على هذه الشروط والأحكام.</p>
+    <h2>الطلبات والدفع</h2>
+    <ul>
+      <li>الأسعار قابلة للتغيير دون إشعار مسبق</li>
+      <li>يحق لنا إلغاء أي طلب في حالات الطوارئ</li>
+      <li>الدفع يتم عند الاستلام أو إلكترونياً</li>
+    </ul>
+    <h2>الملكية الفكرية</h2>
+    <p>جميع محتويات الموقع محمية بحقوق الملكية الفكرية لـ TARVEN.</p>
+    <h2>تعديل الشروط</h2>
+    <p>نحتفظ بحق تعديل هذه الشروط في أي وقت مع إشعار العملاء عبر البريد الإلكتروني.</p>
+  </div>
+</div>
+
+<!-- ===================== CHAT BOT ===================== -->
+<button id="chat-fab" class="chat-fab" aria-label="مساعد TARVEN الذكي">
+  💬
+  <span class="notif">1</span>
+</button>
+<div id="chat-window" class="chat-window" role="dialog" aria-label="مساعد العملاء">
+  <div class="chat-win-header">
+    <div class="chat-avatar">🤖</div>
+    <div>
+      <div class="chat-win-title">مساعد TARVEN الذكي</div>
+      <div class="chat-win-sub">متاح دائماً للمساعدة</div>
+    </div>
+    <button id="chat-close-btn" class="chat-close" aria-label="إغلاق">✕</button>
+  </div>
+  <div id="chat-messages" class="chat-messages">
+    <div class="chat-msg bot">
+      <div class="chat-msg-avatar">🤖</div>
+      <div class="chat-bubble">أهلاً! 👋 أنا مساعد TARVEN الذكي. كيف أقدر أساعدك اليوم؟</div>
+    </div>
+  </div>
+  <div id="chat-quick" class="chat-quick">
+    <button class="chat-quick-btn" onclick="Chat.quickSend('الشحن مجاني؟')">📦 الشحن</button>
+    <button class="chat-quick-btn" onclick="Chat.quickSend('سياسة الإرجاع')">↩️ إرجاع</button>
+    <button class="chat-quick-btn" onclick="Chat.quickSend('كوبونات الخصم')">🎟️ كوبونات</button>
+    <button class="chat-quick-btn" onclick="Chat.quickSend('تواصل معكم')">📞 تواصل</button>
+  </div>
+  <div class="chat-input-row">
+    <input id="chat-input" type="text" placeholder="اكتب سؤالك..." aria-label="رسالة للمساعد">
+    <button id="chat-send-btn" class="chat-send" aria-label="إرسال">➤</button>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+// ===== SIGNUP ACTION =====
+AuthPages.signupAction = async function() {
+  const fname = document.getElementById('signup-fname')?.value.trim();
+  const lname = document.getElementById('signup-lname')?.value.trim();
+  const name = [fname, lname].filter(Boolean).join(' ');
+  const email = document.getElementById('signup-email')?.value.trim();
+  const phone = document.getElementById('signup-phone')?.value.trim();
+  const pass = document.getElementById('signup-pass')?.value;
+  await AuthPages.signup.call({ ...AuthPages,
+    getName: () => name,
+    getEmail: () => email,
+    getPhone: () => phone,
+    getPass: () => pass
+  });
+};
+
+// Override signup to use correct IDs
+const _origSignup = AuthPages.signup;
+AuthPages.signup = async function() {
+  const name = [document.getElementById('signup-fname')?.value.trim(), document.getElementById('signup-lname')?.value.trim()].filter(Boolean).join(' ');
+  const email = document.getElementById('signup-email')?.value.trim();
+  const phone = document.getElementById('signup-phone')?.value.trim();
+  const pass = document.getElementById('signup-pass')?.value;
+  const btn = document.getElementById('signup-btn');
+  const err = document.getElementById('signup-err');
+  if (!name) return AuthPages.showErr(err,'أدخل اسمك');
+  if (!email||!email.includes('@')) return AuthPages.showErr(err,'بريد إلكتروني غير صحيح');
+  if (!pass||pass.length<6) return AuthPages.showErr(err,'كلمة المرور 6 أحرف على الأقل');
+  if (btn) { btn.classList.add('btn-loading'); btn.disabled=true; }
+  try {
+    const r = await API.post('/auth/register', { name, email, phone, password: pass });
+    Auth.set(r.token, r.user);
+    Store.updateHeaderUI();
+    UI.toast(`أهلاً ${r.user.name}! حسابك جاهز 🎉`,'success');
+    setTimeout(()=>Router.go('home'),800);
+  } catch(e) {
+    AuthPages.showErr(err, e?.error||'حدث خطأ');
+  } finally { if(btn){btn.classList.remove('btn-loading');btn.disabled=false;} }
+};
+
+// ===== CHECKOUT: Populate order summary on page open =====
+const _origRouterShow = Router.show;
+Router.show = function(page) {
+  _origRouterShow.call(this, page);
+  if (page === 'checkout') {
+    const el = document.getElementById('order-summary-items');
+    if (el) {
+      el.innerHTML = Store.cart.map(item=>`
+        <div class="order-item">
+          <div class="order-item-img">${item.image?.startsWith('/')||item.image?.startsWith('http')?`<img src="${item.image}" style="width:100%;height:100%;object-fit:cover" loading="lazy">`:(item.image||'📦')}</div>
+          <div><div class="order-item-name">${item.name}</div><div class="order-item-qty">الكمية: ${item.quantity}</div></div>
+          <div class="order-item-price">${(item.price*item.quantity)?.toLocaleString('ar-EG')} ج.م</div>
+        </div>`).join('') || '<p style="color:var(--text-3)">السلة فارغة</p>';
+    }
+    CartUI.updateTotals();
+  }
+  // Show mobile search button
+  const msb = document.getElementById('mobile-search-btn');
+  if (msb) msb.style.display = window.innerWidth<=768 ? 'flex':'none';
+};
+
+// Mobile search visibility
+window.addEventListener('resize', () => {
+  const msb = document.getElementById('mobile-search-btn');
+  if (msb) msb.style.display = window.innerWidth<=768?'flex':'none';
+});
+if (window.innerWidth<=768) {
+  const msb = document.getElementById('mobile-search-btn');
+  if (msb) msb.style.display='flex';
+}
+
+// ===== COUPON INPUT (cart sidebar) =====
+document.getElementById('coupon-input')?.addEventListener('input', function(){
+  const msg = document.getElementById('coupon-msg');
+  if (msg) { msg.style.display='none'; msg.textContent=''; }
+});
+</script>
+</body>
+</html>

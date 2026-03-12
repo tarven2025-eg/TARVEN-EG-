@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>TARVEN — لوحة الإدارة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<style>
+body{background:#F1F5F9;min-height:100vh}
+.admin-login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1A1A2E,#16213E)}
+.admin-login-card{background:#fff;border-radius:16px;padding:40px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.chart-bar{display:flex;align-items:flex-end;gap:8px;height:120px;padding-top:12px}
+.chart-bar-item{flex:1;background:var(--accent);border-radius:4px 4px 0 0;min-width:24px;transition:all .3s;cursor:pointer;position:relative}
+.chart-bar-item:hover{background:var(--accent-dk)}
+.chart-bar-item::after{content:attr(data-label);position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted);white-space:nowrap}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);font-size:14px}
+.stat-row:last-child{border-bottom:none}
+</style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div id="admin-login" class="admin-login">
+  <div class="admin-login-card">
+    <div style="text-align:center;margin-bottom:28px">
+      <div style="font-size:28px;font-weight:900;color:var(--accent);font-family:'Inter'">TARVEN</div>
+      <div style="font-size:14px;color:var(--muted);margin-top:4px">لوحة الإدارة</div>
+    </div>
+    <div id="admin-login-err" style="display:none;background:var(--red-lt);color:var(--red);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;text-align:center"></div>
+    <div class="form-group" style="margin-bottom:14px">
+      <label class="form-label">اسم المستخدم</label>
+      <input id="adm-user" class="form-input" placeholder="admin" onkeydown="if(event.key==='Enter')adminLogin()">
+    </div>
+    <div class="form-group" style="margin-bottom:20px">
+      <label class="form-label">كلمة المرور</label>
+      <input id="adm-pass" class="form-input" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')adminLogin()">
+    </div>
+    <button class="btn btn-primary btn-full btn-lg" onclick="adminLogin()">دخول إلى اللوحة →</button>
+    <div style="text-align:center;margin-top:14px;font-size:12px;color:var(--muted)">admin / admin123</div>
+  </div>
+</div>
+
+<!-- Main Admin Dashboard -->
+<div id="admin-main" style="display:none">
+  <div class="admin-wrap">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <div class="sidebar-logo">TAR<span>VEN</span><div style="font-size:11px;opacity:.5;font-weight:400;margin-top:2px">لوحة الإدارة</div></div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">الرئيسية</div>
+        <div class="nav-item active" onclick="showSection('dashboard')"><span class="nav-icon">📊</span> الإحصائيات</div>
+        <div class="nav-section">إدارة المتجر</div>
+        <div class="nav-item" onclick="showSection('products')"><span class="nav-icon">📦</span> المنتجات</div>
+        <div class="nav-item" onclick="showSection('categories')"><span class="nav-icon">🏷️</span> الفئات</div>
+        <div class="nav-item" onclick="showSection('orders')"><span class="nav-icon">🛒</span> الطلبات</div>
+        <div class="nav-item" onclick="showSection('customers')"><span class="nav-icon">👥</span> العملاء</div>
+        <div class="nav-item" onclick="showSection('coupons')"><span class="nav-icon">🎟️</span> الكوبونات</div>
+        <div class="nav-section">التقارير</div>
+        <div class="nav-item" onclick="showSection('analytics')"><span class="nav-icon">📈</span> المبيعات</div>
+        <div class="nav-item" onclick="showSection('inventory')"><span class="nav-icon">📉</span> المخزون</div>
+        <div class="nav-section">الإعدادات</div>
+        <div class="nav-item" onclick="showSection('settings')"><span class="nav-icon">⚙️</span> إعدادات المتجر</div>
+        <div class="nav-item" style="color:rgba(220,38,38,.8)" onclick="adminLogout()"><span class="nav-icon">🚪</span> تسجيل الخروج</div>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="admin-main">
+      <div class="admin-topbar">
+        <h2 id="section-title">📊 الإحصائيات</h2>
+        <div style="display:flex;align-items:center;gap:12px;margin-right:auto">
+          <button class="btn btn-primary btn-sm" onclick="window.open('/')">🛍️ المتجر</button>
+          <div id="admin-user-badge" style="width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800">A</div>
+        </div>
+      </div>
+      <div class="admin-content">
+
+        <!-- DASHBOARD -->
+        <div id="sec-dashboard" class="admin-section">
+          <div class="kpi-grid" id="kpi-grid">
+            <div class="kpi"><div class="kpi-icon">💰</div><div class="kpi-val" id="kpi-sales">—</div><div class="kpi-label">إجمالي المبيعات (ج.م)</div><div class="kpi-change up" id="kpi-sales-change">⏳ جاري التحميل</div></div>
+            <div class="kpi"><div class="kpi-icon">🛒</div><div class="kpi-val" id="kpi-orders">—</div><div class="kpi-label">إجمالي الطلبات</div><div class="kpi-change up" id="kpi-new-orders"></div></div>
+            <div class="kpi"><div class="kpi-icon">📦</div><div class="kpi-val" id="kpi-products">—</div><div class="kpi-label">المنتجات</div><div class="kpi-change" id="kpi-low-stock"></div></div>
+            <div class="kpi"><div class="kpi-icon">👥</div><div class="kpi-val" id="kpi-users">—</div><div class="kpi-label">العملاء</div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+            <div class="chart-wrap">
+              <h3 style="font-size:14px;font-weight:800;margin-bottom:16px">📈 مبيعات آخر 7 أيام</h3>
+              <div class="chart-bar" id="sales-chart">
+                <div style="text-align:center;color:var(--muted);width:100%;font-size:13px">⏳ جاري التحميل...</div>
+              </div>
+            </div>
+            <div class="chart-wrap">
+              <h3 style="font-size:14px;font-weight:800;margin-bottom:16px">🔥 أكثر المنتجات مبيعاً</h3>
+              <div id="top-products-list">
+                <div style="text-align:center;color:var(--muted);font-size:13px">⏳</div>
+              </div>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+              <h3 style="font-size:14px;font-weight:800">🛒 آخر الطلبات</h3>
+              <button class="btn btn-ghost btn-sm" onclick="showSection('orders')">عرض الكل →</button>
+            </div>
+            <div id="recent-orders-table"><div style="text-align:center;padding:20px;color:var(--muted)">⏳</div></div>
+          </div>
+        </div>
+
+        <!-- PRODUCTS -->
+        <div id="sec-products" class="admin-section" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+            <div style="display:flex;gap:10px">
+              <input id="prod-search" class="form-input" placeholder="ابحث عن منتج..." style="width:240px;height:40px" oninput="filterProducts(this.value)">
+              <select id="prod-cat-filter" class="form-input" style="height:40px;width:160px" onchange="filterProducts()"><option value="">كل الفئات</option></select>
+            </div>
+            <button class="btn btn-primary" onclick="openProductModal()">+ إضافة منتج</button>
+          </div>
+          <div class="chart-wrap" style="padding:0;overflow:hidden">
+            <div id="products-table"><div style="text-align:center;padding:40px;color:var(--muted)">⏳ جاري التحميل...</div></div>
+          </div>
+        </div>
+
+        <!-- ORDERS -->
+        <div id="sec-orders" class="admin-section" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-ghost btn-sm active-filter" onclick="loadOrders('')">الكل</button>
+              <button class="btn btn-ghost btn-sm" onclick="loadOrders('pending')">⏳ جديدة</button>
+              <button class="btn btn-ghost btn-sm" onclick="loadOrders('processing')">⚡ جاري</button>
+              <button class="btn btn-ghost btn-sm" onclick="loadOrders('shipped')">🚚 مشحون</button>
+              <button class="btn btn-ghost btn-sm" onclick="loadOrders('delivered')">✅ مسلّم</button>
+              <button class="btn btn-ghost btn-sm" onclick="loadOrders('cancelled')">❌ ملغى</button>
+            </div>
+            <input class="form-input" style="height:38px;width:200px" placeholder="بحث برقم الطلب..." oninput="searchOrders(this.value)">
+          </div>
+          <div class="chart-wrap" style="padding:0;overflow:hidden">
+            <div id="orders-table"><div style="text-align:center;padding:40px;color:var(--muted)">⏳</div></div>
+          </div>
+        </div>
+
+        <!-- CUSTOMERS -->
+        <div id="sec-customers" class="admin-section" style="display:none">
+          <div class="chart-wrap" style="padding:0;overflow:hidden">
+            <div id="customers-table"><div style="text-align:center;padding:40px;color:var(--muted)">⏳</div></div>
+          </div>
+        </div>
+
+        <!-- COUPONS -->
+        <div id="sec-coupons" class="admin-section" style="display:none">
+          <div style="display:flex;justify-content:space-between;margin-bottom:20px">
+            <h3 style="font-size:16px;font-weight:800">🎟️ الكوبونات</h3>
+            <button class="btn btn-primary" onclick="openCouponModal()">+ إضافة كوبون</button>
+          </div>
+          <div class="chart-wrap" style="padding:0;overflow:hidden">
+            <div id="coupons-table"><div style="text-align:center;padding:40px;color:var(--muted)">⏳</div></div>
+          </div>
+        </div>
+
+        <!-- CATEGORIES -->
+        <div id="sec-categories" class="admin-section" style="display:none">
+          <div style="display:flex;justify-content:space-between;margin-bottom:20px">
+            <h3 style="font-size:16px;font-weight:800">🏷️ الفئات</h3>
+            <button class="btn btn-primary" onclick="openCategoryModal()">+ إضافة فئة</button>
+          </div>
+          <div class="chart-wrap" style="padding:0;overflow:hidden">
+            <div id="categories-table"><div style="text-align:center;padding:40px;color:var(--muted)">⏳</div></div>
+          </div>
+        </div>
+
+        <!-- ANALYTICS -->
+        <div id="sec-analytics" class="admin-section" style="display:none">
+          <h3 style="font-size:16px;font-weight:800;margin-bottom:20px">📈 تقارير المبيعات</h3>
+          <div class="kpi-grid" style="margin-bottom:20px">
+            <div class="kpi"><div class="kpi-icon">📈</div><div class="kpi-val" id="an-total">—</div><div class="kpi-label">إجمالي المبيعات</div></div>
+            <div class="kpi"><div class="kpi-icon">🛒</div><div class="kpi-val" id="an-orders">—</div><div class="kpi-label">عدد الطلبات</div></div>
+            <div class="kpi"><div class="kpi-icon">💡</div><div class="kpi-val" id="an-avg">—</div><div class="kpi-label">متوسط قيمة الطلب</div></div>
+            <div class="kpi"><div class="kpi-icon">👥</div><div class="kpi-val" id="an-users">—</div><div class="kpi-label">عدد العملاء</div></div>
+          </div>
+          <div class="chart-wrap">
+            <h4 style="font-size:14px;font-weight:700;margin-bottom:16px">أكثر المنتجات مبيعاً</h4>
+            <div id="analytics-top-products"></div>
+          </div>
+        </div>
+
+        <!-- INVENTORY -->
+        <div id="sec-inventory" class="admin-section" style="display:none">
+          <h3 style="font-size:16px;font-weight:800;margin-bottom:20px">📉 إدارة المخزون</h3>
+          <div class="chart-wrap" style="padding:0;overflow:hidden">
+            <div id="inventory-table"></div>
+          </div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div id="sec-settings" class="admin-section" style="display:none">
+          <h3 style="font-size:16px;font-weight:800;margin-bottom:20px">⚙️ إعدادات المتجر</h3>
+          <div class="chart-wrap" style="max-width:600px">
+            <div class="form-group" style="margin-bottom:14px"><label class="form-label">اسم المتجر</label><input id="set-name" class="form-input" value="TARVEN"></div>
+            <div class="form-group" style="margin-bottom:14px"><label class="form-label">واتساب</label><input id="set-wa" class="form-input" value="01112641854"></div>
+            <div class="form-group" style="margin-bottom:14px"><label class="form-label">البريد الإلكتروني</label><input id="set-email" class="form-input" value="tarven2025@gmail.com"></div>
+            <div class="form-row" style="margin-bottom:14px">
+              <div class="form-group"><label class="form-label">حد الشحن المجاني (ج.م)</label><input id="set-free-ship" class="form-input" type="number" value="200"></div>
+              <div class="form-group"><label class="form-label">تكلفة الشحن (ج.م)</label><input id="set-ship-cost" class="form-input" type="number" value="30"></div>
+            </div>
+            <button class="btn btn-primary" onclick="saveSettings()">💾 حفظ الإعدادات</button>
+            <div style="border-top:1px solid var(--border);margin-top:20px;padding-top:20px">
+              <h4 style="font-size:14px;font-weight:700;margin-bottom:14px">🔐 تغيير كلمة المرور</h4>
+              <div class="form-group" style="margin-bottom:10px"><label class="form-label">كلمة المرور الحالية</label><input id="cp-curr" class="form-input" type="password" placeholder="••••••••"></div>
+              <div class="form-group" style="margin-bottom:14px"><label class="form-label">كلمة المرور الجديدة</label><input id="cp-new" class="form-input" type="password" placeholder="••••••••"></div>
+              <button class="btn btn-outline" onclick="changeAdminPass()">تغيير كلمة المرور</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /admin-content -->
+    </div><!-- /admin-main -->
+  </div>
+</div>
+
+<!-- Product Modal -->
+<div id="prod-modal" class="modal-overlay">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-close" onclick="document.getElementById('prod-modal').classList.remove('open')">✕</div>
+    <h2 style="font-size:18px;font-weight:800;margin-bottom:20px" id="prod-modal-title">إضافة منتج</h2>
+    <input type="hidden" id="edit-prod-id">
+    <div class="form-row" style="margin-bottom:14px">
+      <div class="form-group"><label class="form-label">اسم المنتج *</label><input id="pm-name" class="form-input" placeholder="اسم المنتج"></div>
+      <div class="form-group"><label class="form-label">الفئة</label><select id="pm-cat" class="form-input form-select"><option value="">اختر</option></select></div>
+    </div>
+    <div class="form-group" style="margin-bottom:14px"><label class="form-label">الوصف</label><textarea id="pm-desc" class="form-input form-textarea" placeholder="وصف المنتج..."></textarea></div>
+    <div class="form-row" style="margin-bottom:14px">
+      <div class="form-group"><label class="form-label">السعر (ج.م) *</label><input id="pm-price" class="form-input" type="number" placeholder="299"></div>
+      <div class="form-group"><label class="form-label">السعر قبل الخصم</label><input id="pm-old-price" class="form-input" type="number" placeholder="399"></div>
+    </div>
+    <div class="form-row" style="margin-bottom:14px">
+      <div class="form-group"><label class="form-label">المخزون</label><input id="pm-stock" class="form-input" type="number" placeholder="50"></div>
+      <div class="form-group"><label class="form-label">الشارة (مثال: جديد)</label><input id="pm-badge" class="form-input" placeholder="جديد / خصم / مميز"></div>
+    </div>
+    <div class="form-row" style="margin-bottom:14px">
+      <div class="form-group"><label class="form-label">الصورة (رابط أو إيموجي)</label><input id="pm-image" class="form-input" placeholder="📦 أو https://..."></div>
+      <div class="form-group"><label class="form-label">رمز المنتج (SKU)</label><input id="pm-sku" class="form-input" placeholder="SKU-001"></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:14px">
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" id="pm-featured"> منتج مميز</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" id="pm-bestseller"> الأكثر مبيعاً</label>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="document.getElementById('prod-modal').classList.remove('open')">إلغاء</button>
+      <button class="btn btn-primary" id="prod-save-btn" onclick="saveProduct()">💾 حفظ المنتج</button>
+    </div>
+  </div>
+</div>
+
+<!-- Order Detail Modal -->
+<div id="order-modal" class="modal-overlay">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-close" onclick="document.getElementById('order-modal').classList.remove('open')">✕</div>
+    <h2 style="font-size:18px;font-weight:800;margin-bottom:16px">تفاصيل الطلب</h2>
+    <div id="order-modal-content"></div>
+  </div>
+</div>
+
+<!-- Coupon Modal -->
+<div id="coupon-modal" class="modal-overlay">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-close" onclick="document.getElementById('coupon-modal').classList.remove('open')">✕</div>
+    <h2 style="font-size:18px;font-weight:800;margin-bottom:20px">إضافة كوبون</h2>
+    <div class="form-group" style="margin-bottom:14px"><label class="form-label">كود الكوبون *</label><input id="cp-code" class="form-input" placeholder="TARVEN10" style="text-transform:uppercase"></div>
+    <div class="form-row" style="margin-bottom:14px">
+      <div class="form-group"><label class="form-label">نوع الخصم</label><select id="cp-type" class="form-input form-select"><option value="percent">نسبة مئوية %</option><option value="fixed">مبلغ ثابت ج.م</option></select></div>
+      <div class="form-group"><label class="form-label">قيمة الخصم</label><input id="cp-val" class="form-input" type="number" placeholder="10"></div>
+    </div>
+    <div class="form-row" style="margin-bottom:14px">
+      <div class="form-group"><label class="form-label">الحد الأدنى للطلب</label><input id="cp-min" class="form-input" type="number" placeholder="0"></div>
+      <div class="form-group"><label class="form-label">عدد الاستخدامات</label><input id="cp-max" class="form-input" type="number" placeholder="100"></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="document.getElementById('coupon-modal').classList.remove('open')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveCoupon()">💾 إضافة الكوبون</button>
+    </div>
+  </div>
+</div>
+
+<!-- Category Modal -->
+<div id="cat-modal" class="modal-overlay">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-close" onclick="document.getElementById('cat-modal').classList.remove('open')">✕</div>
+    <h2 style="font-size:18px;font-weight:800;margin-bottom:20px">إضافة فئة</h2>
+    <div class="form-group" style="margin-bottom:14px"><label class="form-label">اسم الفئة *</label><input id="cm-name" class="form-input" placeholder="إلكترونيات"></div>
+    <div class="form-row" style="margin-bottom:14px">
+      <div class="form-group"><label class="form-label">الأيقونة</label><input id="cm-icon" class="form-input" placeholder="📱"></div>
+      <div class="form-group"><label class="form-label">الرابط (Slug)</label><input id="cm-slug" class="form-input" placeholder="electronics"></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="document.getElementById('cat-modal').classList.remove('open')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveCategory()">💾 إضافة</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+const adm = {
+  token: () => localStorage.getItem('tarven_admin_token'),
+  headers() { return {'Content-Type':'application/json','Authorization':'Bearer '+this.token()}; },
+  async get(url){const r=await fetch('/api'+url,{headers:this.headers()});return r.json();},
+  async post(url,b){const r=await fetch('/api'+url,{method:'POST',headers:this.headers(),body:JSON.stringify(b)});return r.json();},
+  async put(url,b){const r=await fetch('/api'+url,{method:'PUT',headers:this.headers(),body:JSON.stringify(b)});return r.json();},
+  async del(url){const r=await fetch('/api'+url,{method:'DELETE',headers:this.headers()});return r.json();},
+};
+
+function showToast(msg,type='info'){
+  const t=document.getElementById('toast'); if(!t)return;
+  const c={info:'#1A1A2E',success:'#16A34A',error:'#DC2626',warning:'#D97706'};
+  t.style.background=c[type]||c.info; t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+async function adminLogin(){
+  const u=document.getElementById('adm-user').value.trim();
+  const p=document.getElementById('adm-pass').value;
+  const errEl=document.getElementById('admin-login-err');
+  if(!u||!p){errEl.textContent='أدخل اسم المستخدم وكلمة المرور';errEl.style.display='block';return;}
+  try{
+    const res=await fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+    const data=await res.json();
+    if(data.error){errEl.textContent=data.error;errEl.style.display='block';return;}
+    localStorage.setItem('tarven_admin_token',data.token);
+    document.getElementById('admin-login').style.display='none';
+    document.getElementById('admin-main').style.display='block';
+    loadDashboard();
+    loadCategoriesForSelect();
+  }catch{errEl.textContent='تعذر الاتصال بالخادم';errEl.style.display='block';}
+}
+
+function adminLogout(){
+  localStorage.removeItem('tarven_admin_token');
+  document.getElementById('admin-main').style.display='none';
+  document.getElementById('admin-login').style.display='flex';
+}
+
+function showSection(id){
+  document.querySelectorAll('.admin-section').forEach(s=>s.style.display='none');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('sec-'+id).style.display='block';
+  event?.target.closest('.nav-item')?.classList.add('active');
+  const titles={dashboard:'📊 الإحصائيات',products:'📦 المنتجات',categories:'🏷️ الفئات',orders:'🛒 الطلبات',customers:'👥 العملاء',coupons:'🎟️ الكوبونات',analytics:'📈 المبيعات',inventory:'📉 المخزون',settings:'⚙️ الإعدادات'};
+  document.getElementById('section-title').textContent=titles[id]||id;
+  const loaders={products:loadProducts,orders:()=>loadOrders(''),customers:loadCustomers,coupons:loadCoupons,categories:loadCategories,analytics:loadAnalytics,inventory:loadInventory,settings:loadSettings};
+  if(loaders[id]) loaders[id]();
+}
+
+async function loadDashboard(){
+  try{
+    const s=await adm.get('/admin/stats');
+    document.getElementById('kpi-sales').textContent=Number(s.totalSales).toLocaleString();
+    document.getElementById('kpi-orders').textContent=s.totalOrders;
+    document.getElementById('kpi-new-orders').textContent=`⏳ ${s.newOrders} طلب جديد`;
+    document.getElementById('kpi-products').textContent=s.totalProducts;
+    document.getElementById('kpi-low-stock').textContent=s.lowStock>0?`⚠️ ${s.lowStock} منتج نفذ`:'✅ المخزون كافٍ';
+    document.getElementById('kpi-low-stock').style.color=s.lowStock>0?'var(--red)':'var(--green)';
+    document.getElementById('kpi-users').textContent=s.totalUsers;
+    renderSalesChart(s.salesByDay);
+    renderTopProducts(s.topProducts);
+    renderRecentOrders(s.recentOrders);
+    // Analytics
+    document.getElementById('an-total').textContent=Number(s.totalSales).toLocaleString();
+    document.getElementById('an-orders').textContent=s.totalOrders;
+    document.getElementById('an-avg').textContent=s.totalOrders>0?Math.round(s.totalSales/s.totalOrders).toLocaleString():'0';
+    document.getElementById('an-users').textContent=s.totalUsers;
+    renderAnalyticsTop(s.topProducts);
+  }catch{showToast('تعذر تحميل الإحصائيات','error');}
+}
+
+function renderSalesChart(days){
+  const el=document.getElementById('sales-chart'); if(!el)return;
+  if(!days?.length){el.innerHTML='<div style="text-align:center;color:var(--muted);width:100%;font-size:13px">لا توجد بيانات</div>';return;}
+  const max=Math.max(...days.map(d=>d.total),1);
+  el.innerHTML=days.map(d=>{
+    const h=Math.max(10,Math.round((d.total/max)*100));
+    const label=new Date(d.date).toLocaleDateString('ar-EG',{weekday:'short'});
+    return `<div class="chart-bar-item" style="height:${h}px" data-label="${label}" title="${Number(d.total).toLocaleString()} ج.م — ${d.count} طلب"></div>`;
+  }).join('')+'<style>.chart-bar{margin-bottom:24px}</style>';
+}
+
+function renderTopProducts(prods){
+  const el=document.getElementById('top-products-list'); if(!el||!prods)return;
+  el.innerHTML=prods.map((p,i)=>`
+    <div class="stat-row">
+      <span style="font-size:13px;font-weight:700">${i+1}. ${p.image?.startsWith('/')?`<img src="${p.image}" style="width:24px;height:24px;border-radius:4px;vertical-align:middle;margin-left:4px">`:p.image||'📦'} ${p.name}</span>
+      <span style="font-size:13px;font-weight:800;color:var(--accent)">${Number(p.sold||0)} مبيع</span>
+    </div>`).join('');
+}
+
+function renderRecentOrders(orders){
+  const el=document.getElementById('recent-orders-table'); if(!el)return;
+  if(!orders?.length){el.innerHTML='<div style="text-align:center;padding:32px;color:var(--muted)">لا توجد طلبات</div>';return;}
+  const statusMap={pending:'status-pending',processing:'status-processing',shipped:'status-shipped',delivered:'status-delivered',cancelled:'status-cancelled'};
+  const statusLabel={pending:'⏳ جديد',processing:'⚡ جاري',shipped:'🚚 مشحون',delivered:'✅ مسلّم',cancelled:'❌ ملغى'};
+  el.innerHTML=`<table class="admin-table"><thead><tr><th>رقم الطلب</th><th>العميل</th><th>المبلغ</th><th>الحالة</th><th>التاريخ</th><th>إجراء</th></tr></thead><tbody>${orders.map(o=>`<tr><td><strong style="font-family:'Inter'">${o.order_number}</strong></td><td>${o.customer_name}</td><td style="font-family:'Inter';font-weight:700">${Number(o.total).toLocaleString()} ج.م</td><td><span class="status-badge ${statusMap[o.status]||''}">${statusLabel[o.status]||o.status}</span></td><td style="font-size:12px;color:var(--muted)">${new Date(o.created_at).toLocaleDateString('ar-EG')}</td><td><button class="btn btn-ghost btn-sm" onclick="viewOrder(${o.id})">عرض</button></td></tr>`).join('')}</tbody></table>`;
+}
+
+async function loadProducts(){
+  const el=document.getElementById('products-table'); if(!el)return;
+  el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">⏳</div>';
+  try{
+    const prods=await adm.get('/products');
+    el.innerHTML=`<table class="admin-table"><thead><tr><th>المنتج</th><th>الفئة</th><th>السعر</th><th>المخزون</th><th>التقييم</th><th>إجراءات</th></tr></thead><tbody>${prods.map(p=>`<tr><td><div style="display:flex;align-items:center;gap:10px"><div style="width:40px;height:40px;border-radius:6px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${p.image?.startsWith('/')?`<img src="${p.image}" style="width:40px;height:40px;border-radius:6px;object-fit:cover">`:p.image||'📦'}</div><div><div style="font-size:13px;font-weight:700">${p.name}</div>${p.badge?`<span style="font-size:11px;background:var(--red-lt);color:var(--red);padding:1px 6px;border-radius:3px">${p.badge}</span>`:''}</div></div></td><td style="font-size:13px;color:var(--muted)">${p.category_name||'—'}</td><td style="font-family:'Inter';font-weight:700">${Number(p.price).toLocaleString()} ج.م${p.old_price?`<br><span style="font-size:11px;color:var(--muted);text-decoration:line-through">${Number(p.old_price).toLocaleString()}</span>`:''}</td><td><span style="font-weight:700;color:${p.stock<5?'var(--red)':'var(--green)'}">${p.stock}</span>${p.stock<5?`<br><span style="font-size:11px;color:var(--red)">⚠️ منخفض</span>`:''}</td><td>${p.rating?`${'★'.repeat(Math.round(p.rating))} <span style="font-size:12px;color:var(--muted)">(${p.review_count})</span>`:'—'}</td><td><div style="display:flex;gap:6px"><button class="btn btn-ghost btn-sm" onclick="editProduct(${p.id})">✏️</button><button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id},'${p.name.replace(/'/g,'').slice(0,20)}')">🗑️</button></div></td></tr>`).join('')}</tbody></table>`;
+  }catch{el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">تعذر تحميل المنتجات</div>';}
+}
+
+function filterProducts(){
+  // Re-load with filters (simplified - just reload)
+  loadProducts();
+}
+
+function openProductModal(editData){
+  document.getElementById('prod-modal-title').textContent = editData ? 'تعديل المنتج' : 'إضافة منتج جديد';
+  document.getElementById('edit-prod-id').value = editData?.id || '';
+  ['name','desc','price','old-price','stock','badge','image','sku'].forEach(f=>{
+    const key=f.replace('-','_').replace('old_price','old_price');
+    const el=document.getElementById('pm-'+f.replace('-','_'));
+    if(el) el.value = editData?.[key.replace('pm_','')] || editData?.[f] || '';
+  });
+  if(editData){
+    document.getElementById('pm-name').value=editData.name||'';
+    document.getElementById('pm-desc').value=editData.description||'';
+    document.getElementById('pm-price').value=editData.price||'';
+    document.getElementById('pm-old-price').value=editData.old_price||'';
+    document.getElementById('pm-stock').value=editData.stock||'';
+    document.getElementById('pm-badge').value=editData.badge||'';
+    document.getElementById('pm-image').value=editData.image||'';
+    document.getElementById('pm-sku').value=editData.sku||'';
+    document.getElementById('pm-featured').checked=!!editData.is_featured;
+    document.getElementById('pm-bestseller').checked=!!editData.is_bestseller;
+    document.getElementById('pm-cat').value=editData.category_id||'';
+  } else {
+    ['pm-name','pm-desc','pm-price','pm-old-price','pm-stock','pm-badge','pm-image','pm-sku'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    document.getElementById('pm-featured').checked=false;
+    document.getElementById('pm-bestseller').checked=false;
+  }
+  document.getElementById('prod-modal').classList.add('open');
+}
+
+async function editProduct(id){
+  try{
+    const p=await adm.get('/products/'+id);
+    openProductModal(p);
+  }catch{showToast('تعذر تحميل المنتج','error');}
+}
+
+async function saveProduct(){
+  const name=document.getElementById('pm-name').value.trim();
+  const price=document.getElementById('pm-price').value;
+  if(!name||!price){showToast('الاسم والسعر مطلوبان','warning');return;}
+  const btn=document.getElementById('prod-save-btn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner" style="border-top-color:var(--accent)"></span>';
+  const id=document.getElementById('edit-prod-id').value;
+  const body={name,description:document.getElementById('pm-desc').value,price,old_price:document.getElementById('pm-old-price').value||null,stock:document.getElementById('pm-stock').value||0,category_id:document.getElementById('pm-cat').value||null,image:document.getElementById('pm-image').value||'📦',badge:document.getElementById('pm-badge').value||null,sku:document.getElementById('pm-sku').value||null,is_featured:document.getElementById('pm-featured').checked?1:0,is_bestseller:document.getElementById('pm-bestseller').checked?1:0};
+  try{
+    const res=id?await adm.put('/admin/products/'+id,body):await adm.post('/admin/products',body);
+    if(res.error){showToast(res.error,'error');}
+    else{showToast(id?'✅ تم التحديث':'✅ تمت الإضافة','success');document.getElementById('prod-modal').classList.remove('open');loadProducts();}
+  }catch{showToast('حدث خطأ','error');}
+  btn.disabled=false; btn.innerHTML='💾 حفظ المنتج';
+}
+
+async function deleteProduct(id,name){
+  if(!confirm(`هل تريد حذف "${name}"؟`))return;
+  try{await adm.del('/admin/products/'+id);showToast('✅ تم الحذف','success');loadProducts();}
+  catch{showToast('حدث خطأ','error');}
+}
+
+async function loadOrders(status){
+  const el=document.getElementById('orders-table');if(!el)return;
+  el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">⏳</div>';
+  const statusMap={pending:'status-pending',processing:'status-processing',shipped:'status-shipped',delivered:'status-delivered',cancelled:'status-cancelled'};
+  const statusLabel={pending:'⏳ جديد',processing:'⚡ جاري',shipped:'🚚 مشحون',delivered:'✅ مسلّم',cancelled:'❌ ملغى'};
+  try{
+    const url=status?`/admin/orders?status=${status}`:'/admin/orders';
+    const data=await adm.get(url);
+    const orders=data.orders||data;
+    if(!orders?.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">لا توجد طلبات</div>';return;}
+    el.innerHTML=`<table class="admin-table"><thead><tr><th>رقم الطلب</th><th>العميل</th><th>الهاتف</th><th>المبلغ</th><th>الحالة</th><th>التاريخ</th><th>إجراء</th></tr></thead><tbody>${orders.map(o=>`<tr><td><strong style="font-family:'Inter'">${o.order_number}</strong></td><td>${o.customer_name}</td><td style="font-family:'Inter';direction:ltr">${o.customer_phone}</td><td style="font-family:'Inter';font-weight:700">${Number(o.total).toLocaleString()} ج.م</td><td><select class="form-input" style="height:32px;font-size:12px;padding:0 6px" onchange="updateOrderStatus(${o.id},this.value)">${['pending','processing','shipped','delivered','cancelled'].map(s=>`<option value="${s}" ${s===o.status?'selected':''}>${statusLabel[s]}</option>`).join('')}</select></td><td style="font-size:12px;color:var(--muted)">${new Date(o.created_at).toLocaleDateString('ar-EG')}</td><td><button class="btn btn-ghost btn-sm" onclick="viewOrder(${o.id})">عرض</button></td></tr>`).join('')}</tbody></table>`;
+  }catch{el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">تعذر تحميل الطلبات</div>';}
+}
+
+function searchOrders(val){
+  if(!val){loadOrders('');return;}
+  const rows=document.querySelectorAll('#orders-table tbody tr');
+  rows.forEach(r=>{r.style.display=r.textContent.includes(val)?'':'none';});
+}
+
+async function updateOrderStatus(id,status){
+  try{await adm.put('/admin/orders/'+id+'/status',{status});showToast('✅ تم تحديث الحالة','success');}
+  catch{showToast('حدث خطأ','error');}
+}
+
+async function viewOrder(id){
+  try{
+    const o=await adm.get('/admin/orders/'+id);
+    const statusLabel={pending:'⏳ جديد',processing:'⚡ جاري',shipped:'🚚 مشحون',delivered:'✅ مسلّم',cancelled:'❌ ملغى'};
+    document.getElementById('order-modal-content').innerHTML=`
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+        <div style="font-size:13px"><strong>رقم الطلب:</strong> ${o.order_number}</div>
+        <div style="font-size:13px"><strong>الحالة:</strong> ${statusLabel[o.status]||o.status}</div>
+        <div style="font-size:13px"><strong>العميل:</strong> ${o.customer_name}</div>
+        <div style="font-size:13px"><strong>الهاتف:</strong> <span dir="ltr">${o.customer_phone}</span></div>
+        <div style="font-size:13px;grid-column:1/-1"><strong>المحافظة:</strong> ${o.city||'—'}</div>
+        <div style="font-size:13px;grid-column:1/-1"><strong>العنوان:</strong> ${o.address||'—'}</div>
+      </div>
+      <h4 style="font-size:13px;font-weight:700;margin-bottom:10px;border-top:1px solid var(--border);padding-top:12px">المنتجات:</h4>
+      ${o.items?.map(i=>`<div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--border)"><span>${i.product_name}</span><span style="font-family:'Inter'">${i.quantity} × ${Number(i.price).toLocaleString()} = <strong>${(i.quantity*i.price).toLocaleString()} ج.م</strong></span></div>`).join('')||''}
+      <div style="margin-top:12px;padding-top:12px;border-top:2px solid var(--border)">
+        ${o.discount>0?`<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--green);margin-bottom:4px"><span>الخصم</span><span>-${Number(o.discount).toLocaleString()} ج.م</span></div>`:''}
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>الشحن</span><span>${o.shipping_cost>0?Number(o.shipping_cost).toLocaleString()+' ج.م':'مجاني'}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:800;color:var(--accent)"><span>الإجمالي</span><span style="font-family:'Inter'">${Number(o.total).toLocaleString()} ج.م</span></div>
+      </div>`;
+    document.getElementById('order-modal').classList.add('open');
+  }catch{showToast('تعذر تحميل الطلب','error');}
+}
+
+async function loadCustomers(){
+  const el=document.getElementById('customers-table');if(!el)return;
+  el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">⏳</div>';
+  try{
+    const users=await adm.get('/admin/users');
+    el.innerHTML=`<table class="admin-table"><thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>الهاتف</th><th>تاريخ التسجيل</th></tr></thead><tbody>${users.map(u=>`<tr><td><div style="display:flex;align-items:center;gap:8px"><div style="width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">${u.name[0]}</div>${u.name}</div></td><td style="font-size:13px;color:var(--muted)">${u.email}</td><td style="font-family:'Inter';direction:ltr;font-size:13px">${u.phone||'—'}</td><td style="font-size:13px;color:var(--muted)">${new Date(u.created_at).toLocaleDateString('ar-EG')}</td></tr>`).join('')}</tbody></table>`;
+  }catch{el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">تعذر تحميل العملاء</div>';}
+}
+
+async function loadCoupons(){
+  const el=document.getElementById('coupons-table');if(!el)return;
+  el.innerHTML='<div style="text-align:center;padding:40px">⏳</div>';
+  try{
+    const coupons=await adm.get('/admin/coupons');
+    el.innerHTML=`<table class="admin-table"><thead><tr><th>الكود</th><th>نوع الخصم</th><th>القيمة</th><th>الاستخدام</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody>${coupons.map(c=>`<tr><td><strong style="font-family:'Inter'">${c.code}</strong></td><td>${c.discount_type==='percent'?'نسبة مئوية':'مبلغ ثابت'}</td><td style="font-family:'Inter';font-weight:700">${c.discount_value}${c.discount_type==='percent'?'%':' ج.م'}</td><td style="font-size:13px">${c.used_count} / ${c.max_uses}</td><td><span class="status-badge ${c.is_active?'status-delivered':'status-cancelled'}">${c.is_active?'✅ فعال':'❌ موقف'}</span></td><td><button class="btn btn-danger btn-sm" onclick="deleteCoupon(${c.id})">🗑️</button></td></tr>`).join('')}</tbody></table>`;
+  }catch{el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">تعذر تحميل الكوبونات</div>';}
+}
+
+function openCouponModal(){document.getElementById('coupon-modal').classList.add('open');}
+
+async function saveCoupon(){
+  const code=document.getElementById('cp-code').value.trim().toUpperCase();
+  const type=document.getElementById('cp-type').value;
+  const val=document.getElementById('cp-val').value;
+  if(!code||!val){showToast('أكمل البيانات','warning');return;}
+  try{
+    const res=await adm.post('/admin/coupons',{code,discount_type:type,discount_value:val,min_order:document.getElementById('cp-min').value||0,max_uses:document.getElementById('cp-max').value||100});
+    if(res.error){showToast(res.error,'error');return;}
+    showToast('✅ تمت الإضافة','success');document.getElementById('coupon-modal').classList.remove('open');loadCoupons();
+  }catch{showToast('حدث خطأ','error');}
+}
+
+async function deleteCoupon(id){
+  if(!confirm('حذف الكوبون؟'))return;
+  try{await adm.del('/admin/coupons/'+id);showToast('✅ تم الحذف','success');loadCoupons();}
+  catch{showToast('حدث خطأ','error');}
+}
+
+async function loadCategories(){
+  const el=document.getElementById('categories-table');if(!el)return;
+  el.innerHTML='<div style="text-align:center;padding:40px">⏳</div>';
+  try{
+    const cats=await adm.get('/categories');
+    el.innerHTML=`<table class="admin-table"><thead><tr><th>الفئة</th><th>الرابط</th><th>إجراء</th></tr></thead><tbody>${cats.map(c=>`<tr><td><span style="font-size:18px;margin-left:8px">${c.icon}</span>${c.name}</td><td style="font-family:'Inter';font-size:13px;color:var(--muted)">${c.slug}</td><td><button class="btn btn-danger btn-sm" onclick="deleteCat(${c.id})">🗑️</button></td></tr>`).join('')}</tbody></table>`;
+  }catch{el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">تعذر التحميل</div>';}
+}
+
+function openCategoryModal(){document.getElementById('cat-modal').classList.add('open');}
+async function saveCategory(){
+  const name=document.getElementById('cm-name').value.trim();
+  const slug=document.getElementById('cm-slug').value.trim();
+  if(!name||!slug){showToast('أكمل البيانات','warning');return;}
+  try{
+    const res=await adm.post('/admin/categories',{name,icon:document.getElementById('cm-icon').value||'📦',slug});
+    if(res.error){showToast(res.error,'error');return;}
+    showToast('✅ تمت الإضافة','success');document.getElementById('cat-modal').classList.remove('open');loadCategories();loadCategoriesForSelect();
+  }catch{showToast('حدث خطأ','error');}
+}
+async function deleteCat(id){
+  if(!confirm('حذف الفئة؟'))return;
+  try{await adm.del('/admin/categories/'+id);showToast('✅ تم الحذف','success');loadCategories();}
+  catch{showToast('حدث خطأ','error');}
+}
+
+function loadAnalytics(){loadDashboard();}
+async function loadInventory(){
+  const el=document.getElementById('inventory-table');if(!el)return;
+  try{
+    const prods=await adm.get('/products');
+    el.innerHTML=`<table class="admin-table"><thead><tr><th>المنتج</th><th>المخزون</th><th>الحالة</th></tr></thead><tbody>${prods.map(p=>`<tr><td>${p.image?.startsWith('/')?`<img src="${p.image}" style="width:28px;height:28px;border-radius:4px;vertical-align:middle;margin-left:6px">`:p.image||'📦'} ${p.name}</td><td style="font-family:'Inter';font-weight:700;color:${p.stock<5?'var(--red)':'var(--green)'}">${p.stock}</td><td><span class="status-badge ${p.stock===0?'status-cancelled':p.stock<5?'status-pending':'status-delivered'}">${p.stock===0?'❌ نفذ':p.stock<5?'⚠️ منخفض':'✅ كافٍ'}</span></td></tr>`).join('')}</tbody></table>`;
+  }catch{el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">تعذر التحميل</div>';}
+}
+
+function renderAnalyticsTop(prods){
+  const el=document.getElementById('analytics-top-products');if(!el||!prods)return;
+  el.innerHTML=prods.map(p=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-size:16px">${p.image?.startsWith('/')?`<img src="${p.image}" style="width:32px;height:32px;border-radius:6px;vertical-align:middle">`:p.image||'📦'}</span><span style="flex:1;font-size:13px;font-weight:700">${p.name}</span><span style="font-size:13px;color:var(--muted)">${p.sold||0} مبيع</span><span style="font-family:'Inter';font-size:13px;font-weight:700;color:var(--accent)">${Number(p.revenue||0).toLocaleString()} ج.م</span></div>`).join('');
+}
+
+async function loadSettings(){
+  try{
+    const s=await adm.get('/settings');
+    document.getElementById('set-name').value=s.store_name||'TARVEN';
+    document.getElementById('set-wa').value=s.whatsapp||'01112641854';
+    document.getElementById('set-email').value=s.email||'tarven2025@gmail.com';
+    document.getElementById('set-free-ship').value=s.free_shipping_min||200;
+    document.getElementById('set-ship-cost').value=s.shipping_cost||30;
+  }catch{}
+}
+
+async function saveSettings(){
+  const body={store_name:document.getElementById('set-name').value,whatsapp:document.getElementById('set-wa').value,email:document.getElementById('set-email').value,free_shipping_min:document.getElementById('set-free-ship').value,shipping_cost:document.getElementById('set-ship-cost').value};
+  try{const res=await adm.post('/admin/settings',body);if(res.success)showToast('✅ تم الحفظ','success');else showToast('حدث خطأ','error');}
+  catch{showToast('حدث خطأ','error');}
+}
+
+async function changeAdminPass(){
+  const curr=document.getElementById('cp-curr').value;
+  const newP=document.getElementById('cp-new').value;
+  if(!curr||!newP){showToast('أكمل البيانات','warning');return;}
+  if(newP.length<6){showToast('كلمة المرور الجديدة 6 أحرف على الأقل','warning');return;}
+  try{const res=await adm.post('/admin/change-password',{current:curr,newPassword:newP});if(res.success){showToast('✅ تم تغيير كلمة المرور','success');document.getElementById('cp-curr').value='';document.getElementById('cp-new').value='';}else showToast(res.error||'حدث خطأ','error');}
+  catch{showToast('حدث خطأ','error');}
+}
+
+async function loadCategoriesForSelect(){
+  try{
+    const cats=await adm.get('/categories');
+    const selects=['pm-cat','prod-cat-filter'];
+    selects.forEach(id=>{
+      const el=document.getElementById(id);if(!el)return;
+      const firstOpt=id==='prod-cat-filter'?'<option value="">كل الفئات</option>':'<option value="">اختر الفئة</option>';
+      el.innerHTML=firstOpt+cats.map(c=>`<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
+    });
+  }catch{}
+}
+
+// Auto-login if token exists
+if(adm.token()){
+  document.getElementById('admin-login').style.display='none';
+  document.getElementById('admin-main').style.display='block';
+  loadDashboard();
+  loadCategoriesForSelect();
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+</script>
+</body>
+</html>
